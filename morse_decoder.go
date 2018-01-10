@@ -1,20 +1,21 @@
-package morse_decoder
+package main
 
-import(
+import (
+	"bytes"
+	"errors"
 	"fmt"
+	"strings"
+
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"errors"
-	"bytes"
-	"strings"
 )
 
 const DatabaseName = "morse"
 const CollectionName = "codes"
 
 type Code struct {
-	Encoded string 
-	Decoded string 
+	Encoded string `bson: "encoded" json: "encoded"`
+	Decoded string `bson: "decoded" json: "decoded"`
 }
 
 func (code Code) String() string {
@@ -29,15 +30,15 @@ func NewMorseCode(session *mgo.Session) *MorseCode {
 	m := MorseCode{session.DB(DatabaseName).C(CollectionName)}
 	return &m
 }
-	
+
 func (this MorseCode) get_decoded(encoded string) (string, error) {
 	result := Code{}
 	err := this.collection.Find(bson.M{"encoded": encoded}).One(&result)
-    if err != nil {
-        return "", errors.New(fmt.Sprintf("'%s' is not a valid Morse code.", encoded))
-    } else {
-        return result.Decoded, nil
-    }
+	if err != nil {
+		return "", errors.New(fmt.Sprintf("'%s' is not a valid Morse code.", encoded))
+	} else {
+		return result.Decoded, nil
+	}
 }
 
 func (this MorseCode) Decode(input string) string {

@@ -1,10 +1,11 @@
-package morse_decoder
+package main
 
-import(
-	"fmt"
-	"gopkg.in/mgo.v2"
+import (
 	"bufio"
+	"fmt"
 	"os"
+
+	"gopkg.in/mgo.v2"
 )
 
 func main() {
@@ -12,15 +13,15 @@ func main() {
 	if err != nil {
 		fmt.Println("Cannot dial MongoDB", err)
 	}
-	defer db.Close() 
+	defer db.Close()
 
-	reader := bufio.NewReader(os.Stdin) 
+	reader := bufio.NewReader(os.Stdin)
 	var storageString string
 	fmt.Print("Enter Morse encoded string:")
-    storageString, _ = reader.ReadString('\n')
-    
-    morse_code := NewMorseCode(db)
-    decoded := morse_code.Decode(storageString[:len(storageString)-1])
-    
-    fmt.Println(decoded)
+	storageString, _ = reader.ReadString('\n')
+
+	morse_code := NewMorseCode(db)
+	decoded := morse_code.Decode(storageString[:len(storageString)-1])
+
+	fmt.Println(decoded)
 }
