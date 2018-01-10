@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
+	"github.com/patrickmn/go-cache"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -24,20 +26,29 @@ func (code Code) String() string {
 
 type MorseCode struct {
 	collection *mgo.Collection
+	cache      *cache.Cache
 }
 
 func NewMorseCode(session *mgo.Session) *MorseCode {
-	m := MorseCode{session.DB(DatabaseName).C(CollectionName)}
+	codesCollection := session.DB(DatabaseName).C(CollectionName)
+	codesCache := cache.New(5*time.Minute, 10*time.Minute)
+	m := MorseCode{codesCollection, codesCache}
 	return &m
 }
 
 func (this MorseCode) get_decoded(encoded string) (string, error) {
 	result := Code{}
-	err := this.collection.Find(bson.M{"encoded": encoded}).One(&result)
-	if err != nil {
-		return "", errors.New(fmt.Sprintf("'%s' is not a valid Morse code.", encoded))
+	decoded, found := this.cache.Get(encoded)
+	if found {
+		return decoded.(string), nil
 	} else {
-		return result.Decoded, nil
+		err := this.collection.Find(bson.M{"encoded": encoded}).One(&result)
+		if err != nil {
+			return "", errors.New(fmt.Sprintf("'%s' is not a valid Morse code.", encoded))
+		} else {
+			this.cache.Set(encoded, result.Decoded, cache.DefaultExpiration)
+			return result.Decoded, nil
+		}
 	}
 }
 
