@@ -8,11 +8,11 @@ Morse code is stored in MongoDB. Name of the database and collection are declare
 To run the current code:
 * Run a mongo container
 ```bash
-$sudo docker run --name mongo-db -p 27017:27017 -d mongo
+$ sudo docker run --name mongo-db -p 27017:27017 -d mongo
 ```
 * Open the mongo shell
 ```bash
-$sudo docker exec -it mongo-db mongo
+$ sudo docker exec -it mongo-db mongo
 ```
 * Put morse code in collection 'codes' in database 'morse'
 ```
@@ -67,13 +67,15 @@ $sudo docker exec -it mongo-db mongo
 ```
 * Install dependencies
 ```bash
-$glide install
+$ glide install
 ```
 * Compile the package
 ```bash
-$go install
+$ go install
 ```
 * Run tests
 ```bash
-$go test
+$ go test
 ```
+2. Optimize code using goroutines
+3. Optimize code using caching
