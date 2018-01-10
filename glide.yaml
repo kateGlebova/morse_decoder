@@ -1,0 +1,5 @@
+package: ""
+excludeDirs:
+- data
+import:
+- package: gopkg.in/mgo.v2
