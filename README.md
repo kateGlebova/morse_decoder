@@ -2,6 +2,8 @@
 
 An exercise done within NTUU "KPI" Computer Architecture course in 3 stages:
 1. Implement a simple Morse Decoder
+2. Optimize code using goroutines
+3. Optimize code using caching
 
 Morse code is stored in MongoDB. Name of the database and collection are declared as constants in morse_decoder.go file.
 
@@ -77,5 +79,3 @@ $ go install
 ```bash
 $ go test
 ```
-2. Optimize code using goroutines
-3. Optimize code using caching
