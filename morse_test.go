@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"strings"
+	"sync"
 	"testing"
 
 	"gopkg.in/mgo.v2"
@@ -30,24 +32,34 @@ func prepare_test_cases(str_test_cases string) ([]string, []string) {
 	return morse, text
 }
 
-func test_one(t *testing.T, encoded, expected string) {
-	db, err := mgo.Dial("localhost")
-	if err != nil {
-		t.Errorf("Cannot dial MongoDB", err)
-	}
-	defer db.Close()
-
-	morse_code := NewMorseCode(db)
-	decoded := morse_code.Decode(encoded)
+func test_one(wg *sync.WaitGroup, mc MorseCode, t *testing.T, encoded, expected string) {
+	defer wg.Done()
+	decoded := mc.Decode(encoded)
 	if decoded != expected {
 		t.Errorf("got='%s'	, expected='%s'\n", decoded, expected)
 	}
 }
 
+func establishDBConnection(address string) *mgo.Session {
+	db, err := mgo.Dial("localhost")
+	if err != nil {
+		panic(fmt.Sprintf("Cannot dial MongoDB: %s", err))
+	}
+	return db
+}
+
 func TestDecode(t *testing.T) {
 	morse, text := prepare_test_cases(read_test_cases_file(t, "test.txt"))
 
+	db := establishDBConnection("localhost")
+	defer db.Close()
+
+	morse_code := NewMorseCode(db)
+
+	var wg sync.WaitGroup
+	wg.Add(len(morse))
 	for i := 0; i < len(morse); i++ {
-		test_one(t, morse[i], text[i])
+		go test_one(&wg, *morse_code, t, morse[i], text[i])
 	}
+	wg.Wait()
 }
